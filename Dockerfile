@@ -13,7 +13,7 @@ RUN git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.
 
 WORKDIR /opt/hermes-agent
 RUN uv venv venv --python 3.14 \
-    && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all]"
+    && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram]"
 
 ENV PATH="/opt/hermes-agent/venv/bin:$PATH"
 
