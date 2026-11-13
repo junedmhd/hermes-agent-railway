@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
-AUTO_UPDATE="${AUTO_UPDATE:-true}"
+# Off unless asked for: updates come from a rebuild at a pinned ref, not from a restart.
+AUTO_UPDATE="${AUTO_UPDATE:-false}"
 
 if [ "$AUTO_UPDATE" = "true" ]; then
   echo "Checking for Hermes updates..."
   cd /opt/hermes-agent
   if git pull --recurse-submodules 2>&1 | grep -v 'Already up to date'; then
     echo "Updating dependencies..."
-    VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram]" --quiet
+    VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram,stt-whisper]" --quiet
     echo "Update complete."
   else
     echo "Already up to date."

@@ -9,11 +9,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
-RUN git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git /opt/hermes-agent
+# Pinned: upstream moves fast and an unpinned clone ran unreviewed code on every build.
+# Bump deliberately (the Naib repo records the ref in deploy/hermes.ref).
+ARG HERMES_REF=4abca2ced7ff336da96f44b937ce0569da0dda60
+RUN git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git /opt/hermes-agent \
+    && git -C /opt/hermes-agent checkout --recurse-submodules "$HERMES_REF"
 
 WORKDIR /opt/hermes-agent
 RUN uv venv venv --python 3.14 \
-    && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram]"
+    && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram,stt-whisper]"
 
 ENV PATH="/opt/hermes-agent/venv/bin:$PATH"
 
