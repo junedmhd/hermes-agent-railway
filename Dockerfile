@@ -16,16 +16,10 @@ RUN git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.
     && git -C /opt/hermes-agent checkout --recurse-submodules "$HERMES_REF"
 
 WORKDIR /opt/hermes-agent
-# Naib patch (2026-11-16): on first connect the email adapter marked ALL existing mail as handled,
-# so mail that arrived while Hermes was down or restarting was never answered. Baseline on SEEN
-# instead: processed mail is marked \Seen by the RFC822 fetch, unread mail stays eligible.
-# The build fails if upstream changed the line, so the patch can never silently stop applying.
-RUN f=plugins/platforms/email/adapter.py \
-    && grep -q 'imap.uid("search", None, "ALL")' "$f" \
-    && sed -i 's/imap.uid("search", None, "ALL")/imap.uid("search", None, "SEEN")/' "$f" \
-    && sed -i 's/IMAP connection test passed. %d existing messages skipped./IMAP connection test passed. %d already-read messages skipped; unread mail will be processed./' "$f" \
-    && grep -q 'imap.uid("search", None, "SEEN")' "$f" \
-    && ! grep -q 'imap.uid("search", None, "ALL")' "$f"
+# Naib's patches to upstream (email: answer mail received while down; HTML replies).
+# naib-patches/apply.py fails the build if upstream changed a patched line.
+COPY naib-patches /opt/naib-patches
+RUN python3 /opt/naib-patches/apply.py
 RUN uv venv venv --python 3.14 \
     && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram,stt-whisper]"
 
