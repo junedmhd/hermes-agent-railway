@@ -21,7 +21,7 @@ WORKDIR /opt/hermes-agent
 COPY naib-patches /opt/naib-patches
 RUN python3 /opt/naib-patches/apply.py
 RUN uv venv venv --python 3.14 \
-    && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram,stt-whisper]"
+    && VIRTUAL_ENV=/opt/hermes-agent/venv uv pip install -e ".[all,telegram,stt-whisper,tts-premium]"
 
 ENV PATH="/opt/hermes-agent/venv/bin:$PATH"
 
